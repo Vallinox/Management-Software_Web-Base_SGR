@@ -1,0 +1,132 @@
+{% extends "invoice/base.html" %}
+{% load custom_filters %}
+
+{% block body %}
+<h3 class="m-4">Fatture</h3>
+<div class="row">
+    <div class="col-12">
+        {% if invoices %}
+        <div class="card border-primary ms-4 me-4 mb-4">
+            <div class="card-header"><i class="fa-solid fa-file-lines fa-lg"> </i>  Riepilogo fatture</div>
+            <div class="card-body">
+                <p class="card-text">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th scope="col">Ragione Sociale</th>
+                            <th scope="col">Numero Fattura</th>
+                            <th scope="col">Data fattura</th>
+                            <th scope="col">Imponibile</th>
+                            <th scope="col">IVA%</th>
+                            <th scope="col">Totale IVA</th>
+                            <th scope="col">Totale Fattura</th>
+                            <th scope="col">Data pagamento</th>
+                            <th scope="col"></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for invoice in invoices %}
+                        <tr>
+                            <td>{{ invoice.company_name }}</td>
+                            <td><b>{{ invoice.invoice_number }}</b></td>
+                            <td>{{ invoice.invoice_date }}</td>
+                            <td>{{ invoice.freight_cost|custom_format_value }}</td>
+                            <td>{{ invoice.vat_rate }}%</td>
+                            <td>{{ invoice.vat_amount|custom_format_value }}</td>
+                            <td><b>{{ invoice.total_amount|custom_format_value }}</b></td>
+                            <td>{{ invoice.payment_due_date }}</td>
+                            <td>
+                                <button type="button" class="btn btn-success me-1"
+                                        href="{% url 'view_invoice' invoice.id %}" data-bs-toggle="modal"
+                                        data-bs-target="#myModal{{invoice.id}}">
+                                    <i class="fa-solid fa-circle-info"></i>
+                                </button>
+
+                                <!-- modal -View Invoice -->
+                                <div class="modal" id="myModal{{invoice.id}}" tabindex="-1"
+                                     aria-labelledby="myModalLabel1" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">
+                                                    Fattura: {{ invoice.invoice_number }} del {{ invoice.formatted_invoice_date }}
+                                                </h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close">
+                                                    <span aria-hidden="true"></span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <ul class="list-unstyled">
+                                                    <li>Ragione sociale: <strong>{{ invoice.company_name }}</strong>
+                                                    </li>
+                                                    <li>Numero fattura: <strong>{{ invoice.invoice_number }}</strong></li>
+                                                    <li>Data fattura: <strong>{{ invoice.invoice_date }}</strong></li>
+                                                    <li>Totale noli: <strong>{{ invoice.freight_cost|custom_format_value }}</strong></li>
+                                                    <li>Aliquota IVA: <strong>{{ invoice.vat_rate }}%</strong></li>
+                                                    <li>Totale IVA: <strong>{{ invoice.vat_amount|custom_format_value }}</strong></li>
+                                                    <li>Totale fattura: <strong>{{ invoice.total_amount|custom_format_value }}</strong></li>
+                                                    <li>Data saldo fattura: <strong>{{ invoice.payment_due_date }}</strong></li>
+                                                </ul>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary"
+                                                        data-bs-dismiss="modal">Close
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <a class="btn btn-warning me-1" href="{% url 'edit' invoice.id %}">
+                                    <i class="fa-regular fa-pen-to-square"></i>
+                                </a>
+                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete{{invoice.id}}">
+                                    <i class="fa-regular fa-trash-can"></i>
+                                </button>
+
+                                <!-- modal - Delete Invoice -->
+                                <div class="modal" id="delete{{invoice.id}}" tabindex="-1"
+                                     aria-labelledby="myModalLabel2" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">
+                                                    Fattura: {{ invoice.invoice_number }} del {{ invoice.formatted_invoice_date }}
+                                                </h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close">
+                                                    <span aria-hidden="true"></span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Sicuro di eliminare questa fattura?</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <form action="{% url 'delete' invoice.id %}" method="POST">
+                                                    {% csrf_token %}
+                                                    <input type="submit" class="btn btn-primary" value="Elimina">
+                                                </form>
+                                                <button type="button" class="btn btn-secondary"
+                                                        data-bs-dismiss="modal">Annulla
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                </p>
+            </div>
+        </div>
+        {% else %}
+        <h5 class="alert alert-primary ms-4 me-4">Nessuna Fattura presente</h5>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

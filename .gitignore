@@ -1,0 +1,22 @@
+db.sqlite3
+
+# Ignora la cartella dei file statici generati
+#/static/
+
+# Ignora la cartella dei file media
+/media/
+
+# Ignora i file di log
+*.log
+
+# Ignora i file di migrazione, ma non quelli di base (a meno che tu non voglia ignorarli)
+*/migrations/*
+
+# Ignora i file di configurazione locali
+*.env
+*.local
+*.sqlite3
+
+# Ignora i file della virtualenv
+venv/
+env/
