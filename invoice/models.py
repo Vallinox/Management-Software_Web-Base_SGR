@@ -70,4 +70,5 @@ class Vehicle(models.Model):
     
     '''
     def is_insurance_expiring_soon(self):
-        return self.insurance_term_expires <= date.today() + timedelta(days=30)'''
+        return self.insurance_term_expires <= date.today() + timedelta(days=30)
+    '''
