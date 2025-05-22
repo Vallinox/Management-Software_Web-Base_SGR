@@ -1,0 +1,128 @@
+{% extends "invoice/base.html" %}
+{% load custom_filters %}
+
+{% block body %}
+<h3 class="text-center m-4">Elenco Mezzi</h3>
+<div class="row justify-content-center">
+    <div class="col-6">
+        <div class="card bg-light mb-3">
+            <div class="card-header">Riepilogo Mezzi</div>
+            <div class="card-body">
+
+                <!-- Dropdown Ragione Sociale -->
+                <div class="mb-3">
+                    <label for="company_name" class="form-label">Ragione Sociale</label>
+                    <select id="company_name" class="form-control">
+                        <option value="">Seleziona Ragione Sociale</option>
+                        {% for company in company_names %}
+                        <option value="{{ company.company_name }}">{{ company.company_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Dropdown Targa -->
+                <div class="mb-3">
+                    <label for="invoice_year" class="form-label">Targa</label>
+                    <select id="invoice_year" class="form-control">
+                        <option value="">Seleziona Targa</option>
+                        {% for year in invoice_years %}
+                        <option value="{{ year.year }}">{{ year.year }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Bottone per Filtrare -->
+                <button class="btn btn-primary" onclick="filterInvoices()">Filtra</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center mt-4">
+    <div class="col-8">
+        <div class="card bg-light mb-3">
+            <div class="card-body">
+                <h4 class="card-title">Fatturato per <span id="selected-company"></span>
+                    <span id="year_company"></span>
+                </h4>
+                <h5 id="revenue-amount">Totale Fatturato (noli): € 0.00</h5>
+                <h5 id="revenue-iva">Totale IVA: € 0.00</h5>
+                <h5 id="revenue-tot">Totale fattura + IVA: € 0.00</h5>
+
+                <!-- Risultati Fatture -->
+                <table class="table mt-3" id="invoice-table">
+                    <thead>
+                    <tr>
+                        <th>Num. Fattura</th>
+                        <th>Data Fattura</th>
+                        <th>Tot. Fattura</th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(value);
+    }
+
+    function filterInvoices() {
+        const companyName = document.getElementById('company_name').value;
+        const invoiceYear = document.getElementById('invoice_year').value;
+
+        fetch(`/invoices/filter/?company_name=${companyName}&year=${invoiceYear}`)
+            .then(response => {  // Aggiungi questa linea per esaminare la risposta
+            return response.json();
+        })
+            .then(data => {
+            const formattedRevenue = new Intl.NumberFormat('it-IT', {
+                style: 'currency',
+                currency: 'EUR',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(data.revenue);
+
+            const formattedRevenueIVA = new Intl.NumberFormat('it-IT', {
+                style: 'currency',
+                currency: 'EUR',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(data.revenue_iva);
+
+            const formattedRevenue_tot_IVA = new Intl.NumberFormat('it-IT', {
+                style: 'currency',
+                currency: 'EUR',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(data.revenue_tot);
+
+            // Aggiorna la somma del fatturato
+            document.getElementById('revenue-amount').innerHTML = `Totale Fatturato (noli): <strong>${formattedRevenue}</strong>`;
+            document.getElementById('revenue-iva').innerHTML = `Totale IVA: <strong>${formattedRevenueIVA}</strong>`;
+            document.getElementById('revenue-tot').innerHTML = `Totale fattura + IVA: <strong>${formattedRevenue_tot_IVA}</strong>`;
+
+            // Mostra la ragione sociale selezionata
+            document.getElementById('selected-company').innerHTML = `<strong>${companyName}</strong>`;
+            document.getElementById('year_company').innerHTML = ` per l'anno: <strong>${invoiceYear}</strong>`;
+
+            // Aggiorna la tabella delle fatture
+            const tableBody = document.querySelector('#invoice-table tbody');
+            tableBody.innerHTML = '';  // Pulisce la tabella
+            data.invoices.forEach(invoice => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                <td>${invoice.invoice_number}</td>
+                <td>${invoice.invoice_date}</td>
+                <td><b>${formatCurrency(invoice.freight_cost)}</b></td>`;
+            tableBody.appendChild(row);
+        });
+    })
+        .catch(error => console.error('Errore nel filtro delle fatture:', error));
+    }
+</script>
+
+{% endblock %}

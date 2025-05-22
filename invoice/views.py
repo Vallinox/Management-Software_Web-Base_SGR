@@ -193,3 +193,4 @@ def filter_invoices(request):
         'revenue_iva': revenue_iva,  # totale iva
         'revenue_tot': revenue_tot  # fatturato con IVA
     })
+

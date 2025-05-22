@@ -1,0 +1,64 @@
+{% extends "invoice/base.html" %}
+{% block body %}
+<h3 class="text-center m-4">Aggiungi Mezzo</h3>
+
+<!-- Messaggio di conferma nascosto -->
+<div id="success-message" class="alert alert-success d-none" role="alert">
+    Il nuovo mezzo è stata inserita con successo.
+    <a href="{% url 'index' %}" class="alert-link">Torna alla home Page.</a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-8">
+        <div class="card bg-light mb-3">
+            <div class="card-header">
+                <i class="fa-solid fa-truck fa-lg"></i> Nuovo Mezzo
+            </div>
+            <div class="card-body">
+                <form id="vehicle-form" action="{% url 'add' %}" method="POST">
+                    {% csrf_token %}
+
+                    <div class="form-grid">
+                        {{ form.as_p }}
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">Aggiungi</button>
+                        <a href="{% url 'index' %}" class="btn btn-secondary">Annulla</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript per AJAX -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById("vehicle-form").addEventListener("submit", function(event) {
+            event.preventDefault();  // Evita il reload della pagina
+
+            let form = this;
+            let formData = new FormData(form);
+
+            fetch(form.action, {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                if (data.success) {
+                    document.getElementById("success-message").classList.remove("d-none");
+                    form.reset();  // Pulisce il form dopo l'invio
+                } else {
+                    alert("Errore nell'invio: " + JSON.stringify(data.errors));
+                }
+            })
+                .catch(error => console.error("Errore:", error));
+        });
+    });
+</script>
+{% endblock %}

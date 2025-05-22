@@ -33,6 +33,14 @@
                     <a class="nav-link" href="{% url 'add' %}">
                         <i class="fa-regular fa-square-plus fa-lg"></i> Aggiungi Fattura</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'vehicle:list_vehicle' %}">
+                        <i class="fa-solid fa-list fa-lg"></i> Elenco Mezzi</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'vehicle:add_vehicle' %}">
+                        <i class="fa-regular fa-square-plus fa-lg"></i> Aggiungi Mezzo</a>
+                </li>
             </ul>
             <form class="d-flex">
                 <input class="form-control me-sm-2" type="search" placeholder="Search">
