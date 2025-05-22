@@ -9,30 +9,61 @@ from django.urls import reverse
 
 
 def add_vehicle(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         form = VehicleForm(request.POST)
         if form.is_valid():
             new_vehicle = form.save()
 
             # Se la richiesta è AJAX, restituiamo JSON
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({"success": True, "message": "Mezzo aggiunto con successo!"})
+            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return JsonResponse(
+                    {"success": True, "message": "Mezzo aggiunto con successo!"}
+                )
 
             # Se non è AJAX, torniamo alla pagina normalmente
-            return render(request, 'vehicle/add_vehicle.html', {
-                'form': VehicleForm(),
-                'success': True
-            })
+            return render(
+                request,
+                "vehicle/add_vehicle.html",
+                {"form": VehicleForm(), "success": True},
+            )
         # Se il form non è valido, restituiamo gli errori in JSON se la richiesta è AJAX
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             return JsonResponse({"success": False, "errors": form.errors}, status=400)
     else:
         form = VehicleForm()
 
-    return render(request, 'vehicle/add_vehicle.html', {
-        'form': form
-    })
+    return render(request, "vehicle/add_vehicle.html", {"form": form})
+
 
 def list_vehicle(request):
-   
-    return render(request, 'vehicle/list_vehicle.html')
+    # Ottieni tutti i nomi di ragione sociale unici
+    company_names = Vehicle.objects.values("company_own").distinct()
+
+    # Ottieni tutti gli anni unici dalle date delle fatture
+    plate = Vehicle.objects.values("plate").values().distinct()
+
+    context = {"company_own": company_names, "plate": plate}
+    return render(request, "vehicle/list_vehicle.html", context)
+
+
+def filter_vehicle(request):
+    company_own = request.GET.get('company_own')
+    vehicles = Vehicle.objects.all()
+
+    # Filtra per nome dell'azienda
+    if company_own:
+        vehicle = vehicles.filter(company_own=company_own)
+
+    # Restituisci i risultati come JSON
+    vehicle_data = list(vehicles.values(
+        'plate',
+        'vehicle_category',
+        'eur_category',
+        'contract_type',
+        'insurance_term_expires',
+        'review_deadline',
+        'bollo_deadline',
+        'aci_card_deadline'
+    ))
+
+    return JsonResponse({'vehicles': vehicle_data})

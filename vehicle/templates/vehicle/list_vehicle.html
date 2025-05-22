@@ -11,51 +11,60 @@
 
                 <!-- Dropdown Ragione Sociale -->
                 <div class="mb-3">
-                    <label for="company_name" class="form-label">Ragione Sociale</label>
-                    <select id="company_name" class="form-control">
+                    <label for="company_own" class="form-label">Ragione Sociale</label>
+                    <select id="company_own" class="form-control">
                         <option value="">Seleziona Ragione Sociale</option>
-                        {% for company in company_names %}
-                        <option value="{{ company.company_name }}">{{ company.company_name }}</option>
+                        {% for company in company_own %}
+                        <option value="{{ company.company_own }}">{{ company.company_own }}</option>
                         {% endfor %}
                     </select>
                 </div>
 
-                <!-- Dropdown Targa -->
+                <!-- Dropdown Targa
                 <div class="mb-3">
                     <label for="invoice_year" class="form-label">Targa</label>
                     <select id="invoice_year" class="form-control">
                         <option value="">Seleziona Targa</option>
-                        {% for year in invoice_years %}
-                        <option value="{{ year.year }}">{{ year.year }}</option>
+                        {% for s_plate in plate %}
+                        <option value="{{ s_plate.plate }}">{{ s_plate.plate }}</option>
                         {% endfor %}
                     </select>
                 </div>
+                 -->
 
                 <!-- Bottone per Filtrare -->
-                <button class="btn btn-primary" onclick="filterInvoices()">Filtra</button>
+                <button class="btn btn-primary" onclick="filterVehicle()">Filtra</button>
             </div>
         </div>
     </div>
 </div>
 
 <div class="row justify-content-center mt-4">
-    <div class="col-8">
+    <div class="col-10">
         <div class="card bg-light mb-3">
             <div class="card-body">
-                <h4 class="card-title">Fatturato per <span id="selected-company"></span>
-                    <span id="year_company"></span>
+                <!--
+                <h4 class="card-title">Prossime scadenze per <span id="selected-vehicle"></span>
+                    <span id="plate-select"></span>
                 </h4>
-                <h5 id="revenue-amount">Totale Fatturato (noli): € 0.00</h5>
-                <h5 id="revenue-iva">Totale IVA: € 0.00</h5>
-                <h5 id="revenue-tot">Totale fattura + IVA: € 0.00</h5>
+                <h5 id="revenue-amount">Scadenza assicurazione: </h5>
+                <h5 id="revenue-iva">Scadenza revisione: </h5>
+                <h5 id="revenue-tot">Scadenze bollo: </h5>
+                <h5 id="revenue-tot">Scadenze tessera ACI: </h5>
+                -->
 
                 <!-- Risultati Fatture -->
-                <table class="table mt-3" id="invoice-table">
+                <table class="table mt-3" id="vehicle-table">
                     <thead>
                     <tr>
-                        <th>Num. Fattura</th>
-                        <th>Data Fattura</th>
-                        <th>Tot. Fattura</th>
+                        <th>Targa</th>
+                        <th>Categoria Veicolo</th>
+                        <th>Euro</th>
+                        <th>Tip. Contatto</th>
+                        <th>Scad. Assic.</th>
+                        <th>Scad. Revisione</th>
+                        <th>Scad. Bollo</th>
+                        <th>Scad. Tessere Aci</th>
                     </tr>
                     </thead>
                     <tbody></tbody>
@@ -66,63 +75,32 @@
 </div>
 
 <script>
-    function formatCurrency(value) {
-        return new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR' }).format(value);
-    }
+function filterVehicle() {
+    const companyName = document.getElementById('company_own').value;
 
-    function filterInvoices() {
-        const companyName = document.getElementById('company_name').value;
-        const invoiceYear = document.getElementById('invoice_year').value;
-
-        fetch(`/invoices/filter/?company_name=${companyName}&year=${invoiceYear}`)
-            .then(response => {  // Aggiungi questa linea per esaminare la risposta
-            return response.json();
-        })
-            .then(data => {
-            const formattedRevenue = new Intl.NumberFormat('it-IT', {
-                style: 'currency',
-                currency: 'EUR',
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }).format(data.revenue);
-
-            const formattedRevenueIVA = new Intl.NumberFormat('it-IT', {
-                style: 'currency',
-                currency: 'EUR',
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }).format(data.revenue_iva);
-
-            const formattedRevenue_tot_IVA = new Intl.NumberFormat('it-IT', {
-                style: 'currency',
-                currency: 'EUR',
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }).format(data.revenue_tot);
-
-            // Aggiorna la somma del fatturato
-            document.getElementById('revenue-amount').innerHTML = `Totale Fatturato (noli): <strong>${formattedRevenue}</strong>`;
-            document.getElementById('revenue-iva').innerHTML = `Totale IVA: <strong>${formattedRevenueIVA}</strong>`;
-            document.getElementById('revenue-tot').innerHTML = `Totale fattura + IVA: <strong>${formattedRevenue_tot_IVA}</strong>`;
-
-            // Mostra la ragione sociale selezionata
-            document.getElementById('selected-company').innerHTML = `<strong>${companyName}</strong>`;
-            document.getElementById('year_company').innerHTML = ` per l'anno: <strong>${invoiceYear}</strong>`;
-
-            // Aggiorna la tabella delle fatture
-            const tableBody = document.querySelector('#invoice-table tbody');
+    fetch(`/vehicles/filter/?company_own=${companyName}`)
+        .then(response => response.json())
+        .then(data => {
+            const tableBody = document.querySelector('#vehicle-table tbody');
             tableBody.innerHTML = '';  // Pulisce la tabella
-            data.invoices.forEach(invoice => {
+
+            data.vehicles.forEach(vehicle => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                <td>${invoice.invoice_number}</td>
-                <td>${invoice.invoice_date}</td>
-                <td><b>${formatCurrency(invoice.freight_cost)}</b></td>`;
-            tableBody.appendChild(row);
-        });
-    })
-        .catch(error => console.error('Errore nel filtro delle fatture:', error));
-    }
+                    <td>${vehicle.plate}</td>
+                    <td>${vehicle.vehicle_category}</td>
+                    <td><b>${vehicle.eur_category}</b></td>
+                    <td>${vehicle.contract_type}</td>
+                    <td>${vehicle.insurance_term_expires}</td>
+                    <td>${vehicle.review_deadline}</td>
+                    <td>${vehicle.bollo_deadline}</td>
+                    <td>${vehicle.aci_card_deadline}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        })
+        .catch(error => console.error('Errore nel filtro dei mezzi:', error));
+}
 </script>
 
 {% endblock %}

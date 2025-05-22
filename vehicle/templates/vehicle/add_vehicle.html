@@ -15,7 +15,7 @@
                 <i class="fa-solid fa-truck fa-lg"></i> Nuovo Mezzo
             </div>
             <div class="card-body">
-                <form id="vehicle-form" action="{% url 'add' %}" method="POST">
+                <form id="vehicle-form" action="{% url 'vehicle:add_vehicle' %}" method="POST">
                     {% csrf_token %}
 
                     <div class="form-grid">
