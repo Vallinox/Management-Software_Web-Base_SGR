@@ -1,26 +1,24 @@
-{% extends "invoice/base.html" %}
-{% load custom_filters %}
-
-{% block body %}
+{% extends "invoice/base.html" %} {% load custom_filters %} {% block body %}
 <h3 class="text-center m-4">Elenco Mezzi</h3>
 <div class="row justify-content-center">
-    <div class="col-6">
-        <div class="card bg-light mb-3">
-            <div class="card-header">Riepilogo Mezzi</div>
-            <div class="card-body">
+  <div class="col-6">
+    <div class="card bg-light mb-3">
+      <div class="card-header">Riepilogo Mezzi</div>
+      <div class="card-body">
+        <!-- Dropdown Ragione Sociale -->
+        <div class="mb-3">
+          <label for="company_own" class="form-label">Ragione Sociale</label>
+          <select id="company_own" class="form-control">
+            <option value="">Seleziona Ragione Sociale</option>
+            {% for company in company_own %}
+            <option value="{{ company.company_own }}">
+              {{ company.company_own }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
 
-                <!-- Dropdown Ragione Sociale -->
-                <div class="mb-3">
-                    <label for="company_own" class="form-label">Ragione Sociale</label>
-                    <select id="company_own" class="form-control">
-                        <option value="">Seleziona Ragione Sociale</option>
-                        {% for company in company_own %}
-                        <option value="{{ company.company_own }}">{{ company.company_own }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <!-- Dropdown Targa
+        <!-- Dropdown Targa
                 <div class="mb-3">
                     <label for="invoice_year" class="form-label">Targa</label>
                     <select id="invoice_year" class="form-control">
@@ -32,18 +30,24 @@
                 </div>
                  -->
 
-                <!-- Bottone per Filtrare -->
-                <button class="btn btn-primary" onclick="filterVehicle()">Filtra</button>
-            </div>
-        </div>
+        <!-- Bottone per Filtrare -->
+        <button class="btn btn-primary" onclick="filterVehicle()">
+          Filtra
+        </button>
+        <div
+          id="error-message"
+          style="color: red; font-weight: bold; margin: 10px 0"
+        ></div>
+      </div>
     </div>
+  </div>
 </div>
 
 <div class="row justify-content-center mt-4">
-    <div class="col-10">
-        <div class="card bg-light mb-3">
-            <div class="card-body">
-                <!--
+  <div class="col-10">
+    <div class="card bg-light mb-3">
+      <div class="card-body">
+        <!--
                 <h4 class="card-title">Prossime scadenze per <span id="selected-vehicle"></span>
                     <span id="plate-select"></span>
                 </h4>
@@ -53,54 +57,85 @@
                 <h5 id="revenue-tot">Scadenze tessera ACI: </h5>
                 -->
 
-                <!-- Risultati Fatture -->
-                <table class="table mt-3" id="vehicle-table">
-                    <thead>
-                    <tr>
-                        <th>Targa</th>
-                        <th>Categoria Veicolo</th>
-                        <th>Euro</th>
-                        <th>Tip. Contatto</th>
-                        <th>Scad. Assic.</th>
-                        <th>Scad. Revisione</th>
-                        <th>Scad. Bollo</th>
-                        <th>Scad. Tessere Aci</th>
-                    </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
+        <!-- Risultati Fatture -->
+        <table class="table mt-3" id="vehicle-table">
+          <thead>
+            <tr>
+              <th>Targa</th>
+              <th>Categoria Veicolo</th>
+              <th>Euro</th>
+              <th>Tip. Contatto</th>
+              <th>Scad. Assic.</th>
+              <th>Scad. Revisione</th>
+              <th>Scad. Bollo</th>
+              <th>Scad. Tessere Aci</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
+  </div>
 </div>
 
 <script>
-function filterVehicle() {
-    const companyName = document.getElementById('company_own').value;
+  function filterVehicle() {
+    const companyName = document.getElementById("company_own").value;
+    const errorDiv = document.getElementById("error-message");
+    const tableBody = document.querySelector("#vehicle-table tbody");
 
-    fetch(`/vehicles/filter/?company_own=${companyName}`)
-        .then(response => response.json())
-        .then(data => {
-            const tableBody = document.querySelector('#vehicle-table tbody');
-            tableBody.innerHTML = '';  // Pulisce la tabella
+    errorDiv.textContent = "";
+    tableBody.innerHTML = "";
 
-            data.vehicles.forEach(vehicle => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${vehicle.plate}</td>
-                    <td>${vehicle.vehicle_category}</td>
-                    <td><b>${vehicle.eur_category}</b></td>
-                    <td>${vehicle.contract_type}</td>
-                    <td>${vehicle.insurance_term_expires}</td>
-                    <td>${vehicle.review_deadline}</td>
-                    <td>${vehicle.bollo_deadline}</td>
-                    <td>${vehicle.aci_card_deadline}</td>
-                `;
-                tableBody.appendChild(row);
-            });
-        })
-        .catch(error => console.error('Errore nel filtro dei mezzi:', error));
-}
+    if (!companyName) {
+      errorDiv.textContent = "Seleziona un'azienda prima di filtrare i mezzi.";
+      return;
+    }
+
+    fetch(`/vehicles/filter/?company_own=${encodeURIComponent(companyName)}`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        const vehicles = data.vehicles || [];
+
+        if (vehicles.length === 0) {
+          errorDiv.textContent = "Nessun veicolo trovato per questa azienda.";
+          return;
+        }
+
+        vehicles.forEach((vehicle) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td><strong>${vehicle.plate}</strong></td>
+            <td>${vehicle.vehicle_category}</td>
+            <td><strong>${vehicle.eur_category}</strong></td>
+            <td>${vehicle.contract_type}</td>
+            <td>${vehicle.insurance_term_expires}</td>
+            <td>${vehicle.review_deadline}</td>
+            <td>${vehicle.bollo_deadline}</td>
+            <td>${vehicle.aci_card_deadline}</td>
+            <td>
+              <a class="btn btn-warning me-1" href="">
+                <i class="fa-regular fa-pen-to-square"></i>
+              </a>
+              <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete{{invoice.id}}">
+                <i class="fa-regular fa-trash-can"></i>
+              </button>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
+      })
+      .catch((error) => {
+        console.error("Errore nel filtro dei mezzi:", error);
+        errorDiv.textContent =
+          "Errore nel caricamento dei dati. Riprova più tardi.";
+      });
+  }
 </script>
 
 {% endblock %}

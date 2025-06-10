@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from .models import Vehicle
+from django.views.decorators.http import require_POST
+
 
 from .forms import VehicleForm
 from django.http import JsonResponse
@@ -47,14 +49,14 @@ def list_vehicle(request):
 
 
 def filter_vehicle(request):
-    company_own = request.GET.get('company_own')
+    company_own = request.GET.get("company_own")
     vehicles = Vehicle.objects.all()
 
     # Filtra per nome dell'azienda
     if company_own:
         vehicle = vehicles.filter(company_own=company_own)
 
-    # Restituisci i risultati come JSON
+    """ Restituisci i risultati come JSON
     vehicle_data = list(vehicles.values(
         'plate',
         'vehicle_category',
@@ -65,5 +67,23 @@ def filter_vehicle(request):
         'bollo_deadline',
         'aci_card_deadline'
     ))
+    """
+    vehicle_data = Vehicle.objects.filter(company_own=company_own).values(
+        "plate",
+        "vehicle_category",
+        "eur_category",
+        "contract_type",
+        "insurance_term_expires",
+        "review_deadline",
+        "bollo_deadline",
+        "aci_card_deadline",
+    )
 
-    return JsonResponse({'vehicles': vehicle_data})
+    return JsonResponse({"vehicles": list(vehicle_data)})
+
+
+@require_POST
+def delete_vehicle(request, vehicle_id):
+    invoice = get_object_or_404(Vehicle, pk=vehicle_id)
+    invoice.delete()
+    return redirect("vehicles")
