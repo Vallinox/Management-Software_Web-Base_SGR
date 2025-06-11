@@ -60,10 +60,10 @@ def filter_vehicle(request):
                 "vehicle_category": v.vehicle_category,
                 "eur_category": v.eur_category,
                 "contract_type": v.contract_type,
-                "insurance_term_expires": v.insurance_term_expires.strftime("%d-%m-%Y"),
-                "review_deadline": v.review_deadline.strftime("%d-%m-%Y"),
-                "bollo_deadline": v.bollo_deadline.strftime("%d-%m-%Y"),
-                "aci_card_deadline": v.aci_card_deadline.strftime("%d-%m-%Y"),
+                "insurance_term_expires": v.insurance_term_expires.strftime("%d/%m/%Y"),
+                "review_deadline": v.review_deadline.strftime("%d/%m/%Y"),
+                "bollo_deadline": v.bollo_deadline.strftime("%d/%m/%Y"),
+                "aci_card_deadline": v.aci_card_deadline.strftime("%d/%m/%Y"),
             }
             for v in vehicles
         ]

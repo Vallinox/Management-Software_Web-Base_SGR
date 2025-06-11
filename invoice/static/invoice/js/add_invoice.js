@@ -17,9 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .then((response) => response.json())
         .then((data) => {
           if (data.success) {
-            document
-              .getElementById("success-message")
-              .classList.remove("d-none");
+            document.getElementById("success-message").classList.remove("d-none");
             form.reset(); // Pulisce il form dopo l'invio
           } else {
             alert("Errore nell'invio: " + JSON.stringify(data.errors));
