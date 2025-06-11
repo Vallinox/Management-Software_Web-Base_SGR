@@ -40,3 +40,10 @@ class VehicleForm(forms.ModelForm):
             "bollo_deadline": forms.DateInput(attrs={"class": "form-control"}),
             "aci_card_deadline": forms.DateInput(attrs={"class": "form-control"}),
         }
+
+        def clean_plate(self):
+            plate = self.cleaned_data.get("plate")
+            if plate:
+                return plate.upper()
+            return plate
+

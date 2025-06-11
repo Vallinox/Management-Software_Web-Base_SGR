@@ -1,0 +1,79 @@
+{% extends "invoice/base.html" %} {% block body %}
+<h3 class="text-center m-4">Modifica Fattura</h3>
+
+<!-- Messaggio di conferma nascosto -->
+<div id="success-message" class="alert alert-success d-none" role="alert">
+  Veicolo modificata con successo.
+  <a href="{% url 'vehicle:list_vehicle' %}" class="alert-link"
+    >Torna all'elenco mezzi.</a
+  >
+</div>
+
+<div id="card-edit" class="row justify-content-center">
+  <div class="col-8">
+    <div class="card bg-light mb-3">
+      <div class="card-header">
+        <i class="fa-regular fa-file-lines fa-lg"></i> Modifica Veicolo
+      </div>
+      <div class="card-body">
+        <form
+          id="vehicle-form"
+          method="POST"
+          action="{% url 'vehicle:edit_vehicle' vehicle.id %}"
+        >
+          {% csrf_token %}
+
+          <div class="form-grid">{{ form.as_p }}</div>
+
+          <div class="mt-4">
+            <button type="submit" class="btn btn-primary">Modifica</button>
+            <a href="{% url 'vehicle:list_vehicle' %}" class="btn btn-secondary"
+              >Annulla</a
+            >
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript per AJAX -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    document
+      .getElementById("vehicle-form")
+      .addEventListener("submit", function (event) {
+        event.preventDefault(); // Evita il reload della pagina
+
+        let form = this;
+        let formData = new FormData(form);
+
+        fetch(form.action, {
+          method: "POST",
+          body: formData,
+          headers: {
+            "X-Requested-With": "XMLHttpRequest",
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              form.style.display = "none";
+              document.getElementById("card-edit").style.visibility = "hidden";
+
+              document
+                .getElementById("success-message")
+                .classList.remove("d-none");
+              form.reset(); // Pulisce il form dopo l'invio
+
+              let errorElements = document.querySelectorAll(".error-message");
+              errorElements.forEach((el) => el.remove());
+            } else {
+              alert("Errore nell'invio: " + JSON.stringify(data.errors));
+            }
+          })
+          .catch((error) => console.error("Errore:", error));
+      });
+  });
+</script>
+{% endblock %}

@@ -60,27 +60,15 @@ def filter_vehicle(request):
                 "vehicle_category": v.vehicle_category,
                 "eur_category": v.eur_category,
                 "contract_type": v.contract_type,
-                "insurance_term_expires": v.insurance_term_expires.strftime("%Y-%m-%d"),
-                "review_deadline": v.review_deadline.strftime("%Y-%m-%d"),
-                "bollo_deadline": v.bollo_deadline.strftime("%Y-%m-%d"),
-                "aci_card_deadline": v.aci_card_deadline.strftime("%Y-%m-%d"),
+                "insurance_term_expires": v.insurance_term_expires.strftime("%d-%m-%Y"),
+                "review_deadline": v.review_deadline.strftime("%d-%m-%Y"),
+                "bollo_deadline": v.bollo_deadline.strftime("%d-%m-%Y"),
+                "aci_card_deadline": v.aci_card_deadline.strftime("%d-%m-%Y"),
             }
             for v in vehicles
         ]
     }
     return JsonResponse(data)
-
-
-"""
-@require_POST
-def delete_vehicle(request, vehicle_id):
-    if request.method == 'POST':
-        vehicle = get_object_or_404(Vehicle, pk=vehicle_id)
-        #invoice = Invoice.objects.get(pk=id)
-        vehicle.delete()
-    return HttpResponseRedirect(reverse('index'))
-    
-"""
 
 
 @require_http_methods(["DELETE"])
@@ -93,3 +81,13 @@ def delete_vehicle(request, vehicle_id):
         return JsonResponse(
             {"success": False, "error": "Veicolo non trovato"}, status=404
         )
+
+def edit_vehicle(request, id):
+    vehicle = get_object_or_404(Vehicle, id=id)
+    form = VehicleForm(request.POST or None, instance=vehicle)
+
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        return JsonResponse({"success": True})
+
+    return render(request, "vehicle/edit_vehicle.html", {"form": form, "vehicle": vehicle})

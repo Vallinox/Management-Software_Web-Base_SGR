@@ -40,19 +40,24 @@ class Vehicle(models.Model):
     matched_driver = models.CharField(max_length=15)  # Autista abbinato
     # matched_driver = models.ForeignKey("Driver", on_delete=models.SET_NULL, null=True, blank=True)
 
+    def save(self, *args, **kwargs):
+        if self.plate:
+            self.plate = self.plate.upper()  # trasforma in maiuscolo
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"Vehicle {self.plate} - {self.company_own}"
 
-    def formatted_vehicle_date(self):
+    def formatted_insurance_expiry(self):
         return self.insurance_term_expires.strftime("%d.%m.%Y")
 
-    def formatted_vehicle_date(self):
+    def formatted_review_deadline(self):
         return self.review_deadline.strftime("%d.%m.%Y")
 
-    def formatted_vehicle_date(self):
+    def formatted_bollo_deadline(self):
         return self.bollo_deadline.strftime("%d.%m.%Y")
 
-    def formatted_vehicle_date(self):
+    def formatted_aci_deadline(self):
         return self.aci_card_deadline.strftime("%d.%m.%Y")
 
     """
