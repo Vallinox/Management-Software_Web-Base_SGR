@@ -4,17 +4,17 @@ from datetime import date, timedelta
 
 class Vehicle(models.Model):
     VEHICLE_CATEGORIES = [
-        ("motrice", "Motrice"),
-        ("trattore", "Trattore"),
-        ("furgone", "Furgone"),
-        ("autovettura", "Autovettura"),
-        ("rimorchio", "Rimorchio"),
-        ("semirimorchio", "Semirimorchio"),
+        ("Motrice", "Motrice"),
+        ("Trattore", "Trattore"),
+        ("Furgone", "Furgone"),
+        ("Autovettura", "Autovettura"),
+        ("Rimorchio", "Rimorchio"),
+        ("Semirimorchio", "Semirimorchio"),
     ]
 
     CONTRACT_TYPES = [
-        ("leasing", "Leasing"),
-        ("proprietà", "Di proprietà"),
+        ("Leasing", "Leasing"),
+        ("Proprietà", "Di proprietà"),
     ]
 
     EUR_CATEGORIES = [
