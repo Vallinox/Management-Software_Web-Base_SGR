@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from .models import Vehicle
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_http_methods
 
 
 from .forms import VehicleForm
@@ -50,40 +50,46 @@ def list_vehicle(request):
 
 def filter_vehicle(request):
     company_own = request.GET.get("company_own")
-    vehicles = Vehicle.objects.all()
+    vehicles = Vehicle.objects.filter(company_own=company_own)
 
-    # Filtra per nome dell'azienda
-    if company_own:
-        vehicle = vehicles.filter(company_own=company_own)
-
-    """ Restituisci i risultati come JSON
-    vehicle_data = list(vehicles.values(
-        'plate',
-        'vehicle_category',
-        'eur_category',
-        'contract_type',
-        'insurance_term_expires',
-        'review_deadline',
-        'bollo_deadline',
-        'aci_card_deadline'
-    ))
-    """
-    vehicle_data = Vehicle.objects.filter(company_own=company_own).values(
-        "plate",
-        "vehicle_category",
-        "eur_category",
-        "contract_type",
-        "insurance_term_expires",
-        "review_deadline",
-        "bollo_deadline",
-        "aci_card_deadline",
-    )
-
-    return JsonResponse({"vehicles": list(vehicle_data)})
+    data = {
+        "vehicles": [
+            {
+                "id": v.id,  # <-- IMPORTANTE!
+                "plate": v.plate,
+                "vehicle_category": v.vehicle_category,
+                "eur_category": v.eur_category,
+                "contract_type": v.contract_type,
+                "insurance_term_expires": v.insurance_term_expires.strftime("%Y-%m-%d"),
+                "review_deadline": v.review_deadline.strftime("%Y-%m-%d"),
+                "bollo_deadline": v.bollo_deadline.strftime("%Y-%m-%d"),
+                "aci_card_deadline": v.aci_card_deadline.strftime("%Y-%m-%d"),
+            }
+            for v in vehicles
+        ]
+    }
+    return JsonResponse(data)
 
 
+"""
 @require_POST
 def delete_vehicle(request, vehicle_id):
-    invoice = get_object_or_404(Vehicle, pk=vehicle_id)
-    invoice.delete()
-    return redirect("vehicles")
+    if request.method == 'POST':
+        vehicle = get_object_or_404(Vehicle, pk=vehicle_id)
+        #invoice = Invoice.objects.get(pk=id)
+        vehicle.delete()
+    return HttpResponseRedirect(reverse('index'))
+    
+"""
+
+
+@require_http_methods(["DELETE"])
+def delete_vehicle(request, vehicle_id):
+    try:
+        vehicle = Vehicle.objects.get(id=vehicle_id)
+        vehicle.delete()
+        return JsonResponse({"success": True})
+    except Vehicle.DoesNotExist:
+        return JsonResponse(
+            {"success": False, "error": "Veicolo non trovato"}, status=404
+        )
