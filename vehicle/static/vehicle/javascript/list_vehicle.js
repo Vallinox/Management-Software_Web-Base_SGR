@@ -45,6 +45,7 @@ function filterVehicle() {
                 <i class="fa-regular fa-trash-can"></i>
               </button>
             </td>
+
           `;
         tableBody.appendChild(row);
       });
@@ -113,3 +114,4 @@ function getCookie(name) {
   }
   return cookieValue;
 }
+
