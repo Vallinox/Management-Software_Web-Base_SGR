@@ -6,6 +6,7 @@ db.sqlite3
 # Ignora la cartella dei file media
 /media/
 
+*/media/*
 # Ignora i file di log
 *.log
 
