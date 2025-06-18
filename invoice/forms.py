@@ -92,7 +92,6 @@ class InvoiceFormEdit(forms.ModelForm):
             # *** MODIFICA QUI PER LA DATA ***
             'payment_due_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}, format='%Y-%m-%d'),
         }
-
     def clean(self):
         cleaned_data = super().clean()
         # ... (il resto del tuo metodo clean)
@@ -111,3 +110,4 @@ class InvoiceFormEdit(forms.ModelForm):
             cleaned_data['total_amount'] = None
 
         return cleaned_data
+    
