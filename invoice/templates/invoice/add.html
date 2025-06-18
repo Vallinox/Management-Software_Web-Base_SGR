@@ -17,6 +17,21 @@
                 <i class="fa-regular fa-file-lines fa-lg"></i> Nuova Fattura
             </div>
             <div class="card-body">
+
+                <div class="mb-4 p-3 border rounded bg-white">
+                    <h5>Carica PDF per compilazione automatica</h5>
+                    <form id="pdf-upload-form" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="form-group mb-3">
+                            <label for="id_pdf_file" class="form-label">Seleziona PDF:</label>
+                            <input type="file" class="form-control" id="id_pdf_file" name="pdf_file" accept=".pdf" required>
+                        </div>
+                        <button type="submit" class="btn btn-info">Carica PDF</button>
+                        <button type="button" class="btn btn-secondary" id="manual-fill-btn">Compila Manualmente</button>
+                    </form>
+                    <div id="pdf-upload-feedback" class="mt-2"></div>
+                </div>
+                
                 <form id="invoice-form" action="{% url 'add' %}" method="POST">
                     {% csrf_token %}
 
@@ -33,6 +48,12 @@
         </div>
     </div>
 </div>
+
+
+<script>
+    // Define a JavaScript variable with the correct URL
+    const uploadPdfUrl = "{% url 'upload_pdf_ajax_process' %}";
+</script>
 
 <script src="{% static 'invoice/js/add_invoice.js' %}"></script>
 {% endblock %}

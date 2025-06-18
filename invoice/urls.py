@@ -9,4 +9,5 @@ urlpatterns = [
     path('delete/<int:id>/', views.delete, name='delete'),
     path('list_invoice/', views.list_invoice, name='list_invoice'),
     path('invoices/filter/', views.filter_invoices, name='filter_invoices'),
+    path('upload-pdf/', views.upload_pdf_ajax_process, name='upload_pdf_ajax_process'),
 ]
