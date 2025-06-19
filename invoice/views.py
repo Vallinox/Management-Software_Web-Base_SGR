@@ -28,12 +28,10 @@ def index(request):
     invoices = Invoice.objects.all().order_by(
         "company_name", "invoice_date", "invoice_number"
     )
-    clear_file_xml()
-
     return render(request, "invoice/index.html", {"invoices": invoices})
 
 
-def clear_file_xml():
+def clear_file_temp():
     temp_dirs = [Path("invoice/media/temp"), Path("media/media/temp")]
 
     for temp_dir in temp_dirs:
@@ -400,13 +398,14 @@ def extract_data_with_pdfquery(pdf_file_object):
         if isinstance(value, Decimal):
             extracted_data[key] = str(value)
 
+    clear_file_temp()
     return extracted_data, user_messages
 
 
 def upload_pdf_ajax_process(request):
     if request.method == "POST" and request.FILES.get("pdf_file"):
         pdf_file = request.FILES["pdf_file"]
-        print(f"Received file: {pdf_file.name}")  # Debugging line
+        # print(f"Received file: {pdf_file.name}")  # Debugging line
         all_messages = []  # Collect all messages here
 
         try:
@@ -432,4 +431,5 @@ def upload_pdf_ajax_process(request):
     all_messages = [
         {"type": "error", "text": "Nessun file PDF fornito o metodo non supportato."}
     ]
+
     return JsonResponse({"success": False, "messages": all_messages}, status=400)
