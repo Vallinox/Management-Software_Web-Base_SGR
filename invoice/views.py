@@ -39,9 +39,11 @@ def clear_file_temp():
             for f in temp_dir.iterdir():
                 if f.is_file():
                     try:
+                        
                         f.unlink()
                         print(f"File eliminato: {f}")
                     except Exception as e:
+                        
                         print(f"Errore eliminando {f}: {e}")
         else:
             print(f"Cartella non trovata: {temp_dir}")
