@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from django.conf import settings
 from django.db.models import Sum
 from django.db.models.functions import ExtractYear
@@ -33,16 +34,19 @@ def index(request):
 
 
 def clear_file_xml():
-    temp_dir = "invoice/media/temp"
-    # Ciclo per tutti i file nella cartella
-    for filename in os.listdir(temp_dir):
-        file_path = os.path.join(temp_dir, filename)
-        try:
-            if os.path.isfile(file_path):
-                os.remove(file_path)  # elimina il file
-                print(f"File eliminato: {file_path}")
-        except Exception as e:
-            print(f"Errore eliminando {file_path}: {e}")
+    temp_dirs = [Path("invoice/media/temp"), Path("media/media/temp")]
+
+    for temp_dir in temp_dirs:
+        if temp_dir.is_dir():
+            for f in temp_dir.iterdir():
+                if f.is_file():
+                    try:
+                        f.unlink()
+                        print(f"File eliminato: {f}")
+                    except Exception as e:
+                        print(f"Errore eliminando {f}: {e}")
+        else:
+            print(f"Cartella non trovata: {temp_dir}")
 
 
 def view_invoice(request, id):
