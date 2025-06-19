@@ -1,3 +1,5 @@
+import os
+from django.conf import settings
 from django.db.models import Sum
 from django.db.models.functions import ExtractYear
 from django.db.models.functions import ExtractMonth
@@ -5,6 +7,8 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.contrib import messages
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 
 import invoice  # Per messaggi di feedback
 
@@ -23,7 +27,22 @@ def index(request):
     invoices = Invoice.objects.all().order_by(
         "company_name", "invoice_date", "invoice_number"
     )
+    clear_file_xml()
+
     return render(request, "invoice/index.html", {"invoices": invoices})
+
+
+def clear_file_xml():
+    temp_dir = "invoice/media/temp"
+    # Ciclo per tutti i file nella cartella
+    for filename in os.listdir(temp_dir):
+        file_path = os.path.join(temp_dir, filename)
+        try:
+            if os.path.isfile(file_path):
+                os.remove(file_path)  # elimina il file
+                print(f"File eliminato: {file_path}")
+        except Exception as e:
+            print(f"Errore eliminando {file_path}: {e}")
 
 
 def view_invoice(request, id):
@@ -40,10 +59,7 @@ def add(request):
             # Se la richiesta è AJAX, restituiamo JSON
             if request.headers.get("X-Requested-With") == "XMLHttpRequest":
                 return JsonResponse(
-                    {
-                        "success": True,
-                        "message": "Fattura aggiunta con successo!"
-                    }
+                    {"success": True, "message": "Fattura aggiunta con successo!"}
                 )
             else:
                 messages.success(request, "Fattura aggiunta con successo!")
@@ -317,7 +333,9 @@ def extract_data_with_pdfquery(pdf_file_object):
             else ""
         )
         try:
-            vat_rate_decimal = Decimal(vat_rate_raw).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            vat_rate_decimal = Decimal(vat_rate_raw).quantize(
+                Decimal("0.01"), rounding=ROUND_HALF_UP
+            )
             extracted_data["vat_rate"] = vat_rate_decimal
         except Exception:
             user_messages.append(
@@ -384,6 +402,7 @@ def extract_data_with_pdfquery(pdf_file_object):
 def upload_pdf_ajax_process(request):
     if request.method == "POST" and request.FILES.get("pdf_file"):
         pdf_file = request.FILES["pdf_file"]
+        print(f"Received file: {pdf_file.name}")  # Debugging line
         all_messages = []  # Collect all messages here
 
         try:
@@ -406,7 +425,6 @@ def upload_pdf_ajax_process(request):
             return JsonResponse(
                 {"success": False, "messages": all_messages}, status=500
             )
-
     all_messages = [
         {"type": "error", "text": "Nessun file PDF fornito o metodo non supportato."}
     ]

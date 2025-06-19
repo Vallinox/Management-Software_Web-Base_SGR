@@ -197,6 +197,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         successMessageContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
                     
+                    
                     // Assicurati che il form venga resettato SOLO DOPO aver mostrato il messaggio
                     // o gestisci il redirect se lo vuoi automatico
                     
