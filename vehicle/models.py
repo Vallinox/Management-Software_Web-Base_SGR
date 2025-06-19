@@ -26,13 +26,9 @@ class Vehicle(models.Model):
     ]
     company_own = models.CharField(max_length=100)  # Nome dell'azienda
     plate = models.CharField(max_length=10)  # Targa
-    vehicle_category = models.CharField(
-        max_length=15, choices=VEHICLE_CATEGORIES
-    )  # Categoria del mezzo
+    vehicle_category = models.CharField(max_length=15, choices=VEHICLE_CATEGORIES)  # Categoria del mezzo
     eur_category = models.CharField(max_length=10, choices=EUR_CATEGORIES)  # Euro
-    contract_type = models.CharField(
-        max_length=15, choices=CONTRACT_TYPES
-    )  # contratto tipo: leasing o di proprietà
+    contract_type = models.CharField(max_length=15, choices=CONTRACT_TYPES)  # contratto tipo: leasing o di proprietà
     insurance_term_expires = models.DateField()  # Scadenza assicurazione
     review_deadline = models.DateField()  # Revisione assicurazione
     bollo_deadline = models.DateField()  # Scadenza bollo
@@ -59,6 +55,7 @@ class Vehicle(models.Model):
 
     def formatted_aci_deadline(self):
         return self.aci_card_deadline.strftime("%d.%m.%Y")
+    
 
     """
     def is_insurance_expiring_soon(self):
